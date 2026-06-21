@@ -3,6 +3,17 @@ using ProductManagementApi.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var AllowedCorsPolicy = "product-management";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: AllowedCorsPolicy,
+        policy  =>
+        {
+            policy.WithOrigins("http://localhost:5173");
+        });
+});
+
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
@@ -18,6 +29,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors(AllowedCorsPolicy);
 
 app.UseExceptionHandler(exceptionHandlerApp =>
 {
