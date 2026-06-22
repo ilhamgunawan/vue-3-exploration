@@ -3,37 +3,57 @@ import { ref, watchEffect, toValue, type ComputedRef } from 'vue';
 type UseFetchOptions = {
   url: ComputedRef<string>
   method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE' | 'OPTION'
+  enabled?: boolean
+}
+
+type FetchDataOptions = {
+  body?: Record<string, any>
+  headers?: Record<string, string>
+  onSuccess?: (data: any) => void
 }
 
 export function useFetch<T>(options: UseFetchOptions) {
-  const { url, method } = options;
+  const { url, method, enabled = true } = options;
 
   const data = ref<T | null>(null)
   const error = ref(null)
   const loading = ref(true)
 
-  const fetchData = () => {
+  const fetchData = async (options?: FetchDataOptions) => {
     // reset state before fetching..
     data.value = null
     error.value = null
     loading.value = true
 
-    fetch(toValue(url), { method: toValue(method) })
-      .then((res) => res.json())
-      .then((json) => {
-        data.value = json
+    try {
+      const res = await fetch(toValue(url), { 
+        method: toValue(method),
+        body: options?.body ? JSON.stringify(options.body) : undefined,
+        headers: {
+          'Content-Type': 'application/json',
+        },
       })
-      .catch((err) => {
-        error.value = err
-      })
-      .finally(() => {
-        loading.value = false
-      })
+
+      const json = await res.json()
+      data.value = json
+
+      if (res.ok) {
+        options?.onSuccess?.(json)
+      } else {
+        error.value = json?.title || res.statusText
+      }
+    } catch(err) {
+      error.value = err as any
+    } finally {
+      loading.value = false
+    }
   }
 
   watchEffect(() => {
-    fetchData()
+    if (toValue(enabled)) {
+      fetchData()
+    }
   })
 
-  return { data, error, loading }
+  return { data, error, loading, fetchData }
 }

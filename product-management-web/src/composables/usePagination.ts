@@ -44,7 +44,7 @@ export function usePagination<T>(endpoint: string) {
     `${import.meta.env.VITE_BASE_API_URL}${endpoint}` + `?${searchQueries.value}`
   )
 
-  const { data, error, loading } = useFetch<IPaginatedResponse>({
+  const { data, error, loading, fetchData: refetch } = useFetch<IPaginatedResponse>({
     url,
     method: 'GET',
   })
@@ -91,6 +91,7 @@ export function usePagination<T>(endpoint: string) {
     currentPageSize,
     fetchNextPage,
     fetchPrevPage,
-    changePageSize
+    changePageSize,
+    refetch,
   }
 }

@@ -1,13 +1,15 @@
 <script setup lang="ts">
+  import AddProductDialog from '@/components/AddProductDialog.vue';
   import { useProducts } from '@/composables/useProducts';
   import { PAGE_SIZES } from '@/shared/constant';
 
-  const { data, loading, currentPageSize, changePageSize, fetchNextPage, fetchPrevPage } = useProducts();
+  const { data, loading, currentPageSize, changePageSize, fetchNextPage, fetchPrevPage, refetch } = useProducts();
 </script>
 
 <template>
   <h1>Product List</h1>
   <hr/>
+  <AddProductDialog v-on:success="refetch()" />
   <div v-if="loading">Loading products...</div>
   <div v-else-if="!loading && !data?.products?.length">
     No product found for the current filter.
