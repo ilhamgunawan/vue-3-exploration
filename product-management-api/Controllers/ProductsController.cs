@@ -24,20 +24,42 @@ public class ProductsController : ControllerBase
 
     [HttpGet]
     public async Task<IActionResult> GetAll(
+        [FromQuery] List<string>? status,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 10,
-        [FromQuery] string status = "active")
+        [FromQuery] string? name = "")
     {
         if (page < 1) page = 1;
         if (pageSize < 1) pageSize = 10;
 
-        var query = _db.Products.Where(p => p.Status == status);
+        // Default status filter
+        if (status == null || status.Count == 0)
+        {
+            status = new List<string>
+            {
+                "active",
+                "inactive"
+            };
+        }
+
+        var query = _db.Products.AsQueryable();
+
+        // Status filter
+        query = query.Where(p => status.Contains(p.Status));
+
+        // Optional name filter
+        if (!string.IsNullOrWhiteSpace(name))
+        {
+            var nameFilter = name.ToLower();
+
+            query = query.Where(p => p.Name.ToLower().Contains(nameFilter));
+        }
 
         var totalItems = await query.CountAsync();
         var totalPage = (int)Math.Ceiling((double)totalItems / pageSize);
 
         var products = await query
-            .OrderBy(p => p.Id)
+            .OrderByDescending(p => p.CreatedAt)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .Select(p => new ProductResponse
