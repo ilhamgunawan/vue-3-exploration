@@ -9,6 +9,8 @@ namespace ProductManagementApi.Controllers;
 
 [ApiController]
 [Route("api/products")]
+[Consumes("application/json")]
+[Produces("application/json")]
 public class ProductsController : ControllerBase
 {
     private static readonly string[] ValidStatuses = { "active", "inactive", "deleted" };
