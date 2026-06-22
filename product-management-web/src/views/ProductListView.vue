@@ -1,5 +1,6 @@
 <script setup lang="ts">
   import AddProductDialog from '@/components/AddProductDialog.vue';
+  import EditProductDialog from '@/components/EditProductDialog.vue';
   import { useProducts } from '@/composables/useProducts';
   import { PAGE_SIZES } from '@/shared/constant';
 
@@ -21,15 +22,21 @@
           <th>Product ID</th>
           <th>Name</th>
           <th>Status</th>
-          <th>Last Updated</th>
+          <th>Created At</th>
+          <th>Updated At</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="product in data.products">
           <td>{{ product.id }}</td>
           <td>{{ product.name }}</td>
-          <td>{{  product.status }}</td>
-          <td>{{ product.updated_at || product.created_at }}</td>
+          <td>{{ product.status }}</td>
+          <td>{{ product.created_at }}</td>
+          <td>{{ product.updated_at ?? "-" }}</td>
+          <td>
+            <EditProductDialog v-on:success="refetch()" v-bind:product-id="product.id" />
+          </td>
         </tr>
       </tbody>
     </table>
@@ -48,7 +55,7 @@
           {{ pageSize }}
         </option>
       </select>
-      <span>from {{ data.pagination.totalItems ?? 0 }} products.</span>
+      <span>from {{ data?.pagination.totalItems ?? 0 }} products.</span>
     </div>
     <button
       v-bind:disabled="data?.pagination?.page <= 1"
